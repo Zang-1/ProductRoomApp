@@ -11,8 +11,11 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import edu.vlu.week07.productroom.data.local.AppDatabase
+import edu.vlu.week07.productroom.data.local.ProductEntity
 import edu.vlu.week07.productroom.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
+
+private const val DEMO_MAIN_THREAD_CRASH = false
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,9 +37,17 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        // Lab 07B Part 4 – Intentional bug: a raw DAO insert on the main thread, no lifecycleScope/viewModelScope.
+        // Set DEMO_MAIN_THREAD_CRASH = true to reproduce:
+        // java.lang.IllegalStateException: Cannot access database on the main thread ...
+        if (DEMO_MAIN_THREAD_CRASH) {
+            AppDatabase.getDatabase(this).productDao()
+                .insertProductBlocking(ProductEntity(name = "Main thread test", price = 1.0, quantity = 1))
+        }
+
         // Step 3b – Smoke test: Logcat "SMOKE_TEST" shows "DB opened, count = ..."
         lifecycleScope.launch {
-            val count = AppDatabase.getInstance(this@MainActivity).productDao().count()
+            val count = AppDatabase.getDatabase(this@MainActivity).productDao().count()
             Log.d("SMOKE_TEST", "DB opened, count = $count")
         }
 

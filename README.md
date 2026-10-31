@@ -89,7 +89,7 @@ app/src/main/java/edu/vlu/week07/productroom/
 │   ├── local/
 │   │   ├── ProductEntity.kt      # Step 1
 │   │   ├── ProductDao.kt         # Step 2
-│   │   └── AppDatabase.kt        # thread-safe singleton, file product_database.db
+│   │   └── AppDatabase.kt        # Lab 07B: thread-safe singleton getDatabase(), file vlu_product_catalog_db
 │   └── repository/
 │       └── ProductRepository.kt  # runs DAO calls on Dispatchers.IO
 └── ui/
@@ -97,6 +97,15 @@ app/src/main/java/edu/vlu/week07/productroom/
     ├── ProductAdapter.kt         # ListAdapter + DiffUtil
     └── MainActivity.kt           # ViewBinding, observes LiveData
 ```
+
+## Lab 07B – Thread-safe database, repository & main-thread debugging
+
+- `AppDatabase.getDatabase(context)`: Double-Check Locking singleton (`@Volatile` + `synchronized`), database file `vlu_product_catalog_db`, `exportSchema = false`.
+- `ProductRepository` exposes `val allProducts: LiveData<List<ProductEntity>>` and runs every write on `Dispatchers.IO`.
+- Part 4 (intentional bug): set `DEMO_MAIN_THREAD_CRASH = true` in `MainActivity.kt`. The app then calls the non-suspend
+  `ProductDao.insertProductBlocking()` directly on the main thread and crashes with
+  `java.lang.IllegalStateException: Cannot access database on the main thread since it may potentially lock the UI for a long period of time.`
+  The flag is `false` in the submitted code, so the app runs normally.
 
 ## Run
 

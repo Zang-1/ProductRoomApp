@@ -5,23 +5,24 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [ProductEntity::class], version = 1, exportSchema = true)
+@Database(entities = [ProductEntity::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun productDao(): ProductDao
 
     companion object {
-        private const val DATABASE_NAME = "product_database.db"
-
+        // @Volatile: a write to INSTANCE is visible to every thread at once
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        fun getInstance(context: Context): AppDatabase {
+        // Double-Check Locking: check without the lock (fast path), then check again inside it
+        // so two threads arriving together cannot build two databases.
+        fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    DATABASE_NAME
+                    "vlu_product_catalog_db"
                 ).build().also { INSTANCE = it }
             }
         }

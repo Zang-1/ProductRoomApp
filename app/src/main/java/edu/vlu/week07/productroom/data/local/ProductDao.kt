@@ -22,6 +22,10 @@ interface ProductDao {
     @Query("SELECT * FROM products WHERE id = :productId")
     suspend fun getProductById(productId: Int): ProductEntity?
 
+    // Lab 07B Part 4: NOT suspend on purpose, so it can be called straight from the main thread to show the crash
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertProductBlocking(product: ProductEntity)
+
     // Used by the Lab 07 UI (star button, smoke test, "clear all")
     @Query("UPDATE products SET is_favorite = :favorite WHERE id = :productId")
     suspend fun setFavorite(productId: Int, favorite: Boolean)

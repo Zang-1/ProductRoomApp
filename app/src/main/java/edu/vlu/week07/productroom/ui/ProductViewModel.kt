@@ -15,7 +15,7 @@ class ProductViewModel(application: Application) : AndroidViewModel(application)
     val allProducts: LiveData<List<ProductEntity>>
 
     init {
-        val productDao = AppDatabase.getInstance(application).productDao()
+        val productDao = AppDatabase.getDatabase(application).productDao()
         repository = ProductRepository(productDao)
         allProducts = repository.allProducts
     }
